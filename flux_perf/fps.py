@@ -26,7 +26,8 @@ WINDOW_SECONDS = 1.5
 # Ventana para el 1% low: los tirones se notan en segundos, no en un instante
 LOW_WINDOW_SECONDS = 10
 LOW_MIN_FRAMES = 100
-IGNORED_APPS = {"dwm.exe"}
+# Procesos que presentan frames pero no son juegos (el escritorio y el propio Polymath)
+IGNORED_APPS = {"dwm.exe", "polymath.exe"}
 RESTART_SECONDS = 10
 REPORT_SECONDS = 60
 
