@@ -4,9 +4,6 @@
   "presentmon_path": "tools/PresentMon.exe",
   "colors": true,
   "tiles": [
-    { "index": 0, "title": "CPU", "metric": "cpu" },
-    { "index": 1, "title": "GPU", "metric": "gpu" },
-    { "index": 2, "title": "VRAM", "metric": "vram" },
     { "index": 3, "title": "FPS", "metric": "fps" }
   ]
 }

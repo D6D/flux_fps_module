@@ -130,14 +130,11 @@ class PolymathClient:
 class GraphTile:
     """Un tile de gráfica en la barra superior del Polymath (índices 0-3).
 
-    La documentación no dice qué valores admite GenericModuleType ni si el cuerpo del PUT va
-    envuelto en "GenericGraphUpdateRequest", así que se prueban las variantes y se recuerda
-    la que funciona (ver docs/api-notas.md).
+    Comprobado contra Polymath 1.4.5.7 (ver docs/api-notas.md): type es un entero (0 = tile en
+    blanco, 1 = gráfica), el PUT va plano y Polymath responde 200 aunque el ID no exista.
     """
 
-    TYPE_CANDIDATES = ["graph", "Graph", "GRAPH", "genericGraph", "GenericGraph"]
-    _working_type = None
-    _wrap_update = None
+    TYPE_GRAPH = 1
 
     def __init__(self, client, title, index, length, tile_id=None):
         self.client = client
@@ -147,31 +144,18 @@ class GraphTile:
         self.id = tile_id
 
     def create(self):
-        types = [GraphTile._working_type] if GraphTile._working_type else self.TYPE_CANDIDATES
-        last = None
-        for t in types:
-            body = {"title": self.title, "type": t, "index": self.index, "length": self.length}
-            try:
-                result = self.client.post("/config/addGenericTile", body)
-            except ApiError as e:
-                if e.status in (400, 422):
-                    last = e
-                    log.debug("type=%r rechazado: %s", t, e)
-                    continue
-                raise
-            GraphTile._working_type = t
-            message = result.get("message", "") if isinstance(result, dict) else str(result)
-            # "Message with the ID of the new tile": si el mensaje es un único token lo usamos
-            # tal cual; si es una frase, el ID debería coincidir con el título.
-            self.id = message if message and " " not in message.strip() else self.title
-            log.info("Tile %r creado en la posición %d (id=%r, type=%r, respuesta=%r)", self.title, self.index, self.id, t, message)
-            return
-        raise last
+        body = {"title": self.title, "type": self.TYPE_GRAPH, "index": self.index, "length": self.length}
+        result = self.client.post("/config/addGenericTile", body)
+        message = result.get("message", "") if isinstance(result, dict) else str(result)
+        # El mensaje es el ID, que coincide con el título.
+        self.id = message or self.title
+        log.info("Tile %r creado en la posición %d (id=%r)", self.title, self.index, self.id)
 
     def update(self, value, sub_title=None, secondary=None, unit=None, time_unit=None, color=None, leading=None, ending=None):
         fields = {
             "id": self.id,
-            "currentValue": f"{value:.2f}" if isinstance(value, (int, float)) else str(value),
+            # La documentación dice String, pero la API exige un número ("currentValue must be an double").
+            "currentValue": round(float(value), 2),
             "subTitle": sub_title,
             "secondarySubtitle": secondary,
             "unit": unit,
@@ -181,19 +165,7 @@ class GraphTile:
             "ending": ending,
         }
         fields = {k: v for k, v in fields.items() if v is not None}
-        variants = [GraphTile._wrap_update] if GraphTile._wrap_update is not None else [True, False]
-        last = None
-        for wrap in variants:
-            body = {"GenericGraphUpdateRequest": fields} if wrap else fields
-            try:
-                self.client.put("/config/updateGenericTile", body)
-            except ApiError as e:
-                if e.status in (400, 422) and len(variants) > 1:
-                    last = e
-                    continue
-                raise
-            if GraphTile._wrap_update is None:
-                log.info("El PUT de updateGenericTile funciona %s envolver en GenericGraphUpdateRequest", "al" if wrap else "sin")
-            GraphTile._wrap_update = wrap
-            return
-        raise last
+        result = self.client.put("/config/updateGenericTile", fields)
+        message = result.get("message", "") if isinstance(result, dict) else str(result)
+        if "does not exist" in message:
+            raise ApiError(404, message)

@@ -1,15 +1,19 @@
 # flux_perf: módulo de rendimiento para Flux Polymath
 
-Muestra en la barra superior del teclado **Flux Polymath** cuatro gráficas en tiempo real:
+Muestra en la barra superior del teclado **Flux Polymath** un tile de **FPS** (posición 3, al lado del «Hardware Status Text» de serie):
 
-| Posición | Tile | Valor | Línea secundaria |
-| -------- | ---- | ----- | ---------------- |
-| 0 | CPU  | carga de CPU (%) | RAM usada / total |
-| 1 | GPU  | carga de GPU (%) | temperatura · consumo |
-| 2 | VRAM | VRAM usada (GB) | % de la VRAM total |
-| 3 | FPS  | FPS de la ventana en primer plano | nombre del juego |
+```
+FPS                                   144.0 FPS
+Forza Horizon 6 · G-SYNC          1% low 98
+[ gráfica de los últimos 60 s ]
+```
 
-El color de cada gráfica cambia a verde, amarillo o rojo según la carga. Se puede desactivar con `"colors": false`.
+- FPS de la ventana en primer plano (PresentMon) y su gráfica.
+- Nombre del juego (título de la ventana) y **G-SYNC** cuando está actuando (NVAPI).
+- **1% low**: media del 1% de frames más lentos de los últimos 10 s.
+- Color verde, amarillo o rojo según los FPS (`"colors": false` para desactivarlo).
+
+El código también admite tiles de CPU, GPU, RAM y VRAM (métricas `cpu`, `gpu`, `ram`, `vram`; hay un ejemplo en `config.4tiles.json`), pero para eso el módulo de serie se ve mejor: la API no permite una rejilla en un tile (ver [docs/api-notas.md](docs/api-notas.md)).
 
 Usa la [API oficial de Polymath](https://github.com/FluxKeyboard/flux_api) (clonada en `..\flux_api`).
 
@@ -39,7 +43,8 @@ flux_perf/
 │   ├── __main__.py   bucle principal, render de métricas y reconexión
 │   ├── polymath.py   cliente de la API (TLS, clave, tiles)
 │   ├── metrics.py    CPU/RAM (psutil) y GPU/VRAM (NVML)
-│   └── fps.py        FPS con PresentMon
+│   ├── fps.py        FPS y 1% low con PresentMon
+│   └── gsync.py      estado de G-Sync con NVAPI
 ├── config.json
 ├── iniciar.bat
 ├── requirements.txt

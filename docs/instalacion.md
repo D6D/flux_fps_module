@@ -58,4 +58,6 @@ La primera vez que se ejecute el módulo, Polymath mostrará una solicitud de ac
 
 ## 6. Arranque automático (opcional)
 
-Para que se inicie al entrar en Windows, crea un acceso directo a `iniciar.bat` en la carpeta de inicio (`Win+R` → `shell:startup`). El módulo espera solo a que Polymath y su API estén disponibles: lo reintenta cada 5 s.
+Para que se inicie al entrar en Windows hay un acceso directo **«Flux Perf Monitor»** en la carpeta de inicio (`Win+R` → `shell:startup`), configurado el 26-oct-2026. Apunta directamente a `.venv\Scripts\pythonw.exe -m flux_perf` con la carpeta del proyecto como directorio de trabajo, en vez de a `iniciar.bat`, para que no aparezca ni un instante la ventana de consola. El módulo espera solo a que Polymath y su API estén disponibles: lo reintenta cada 5 s.
+
+Para quitar el arranque automático, borra ese acceso directo.
