@@ -1,0 +1,5 @@
+.venv/
+__pycache__/
+*.pyc
+# PresentMon se descarga aparte (ver docs/instalacion.md)
+tools/*.exe
