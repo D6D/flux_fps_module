@@ -93,4 +93,4 @@ See [CHANGELOG.md](CHANGELOG.md) for the history.
 
 ## License
 
-[MIT](LICENSE): use it, change it and share it freely. PresentMon and the Polymath API have their own terms.
+[PolyForm Noncommercial 1.0.0](LICENSE.md): free to use, modify and share for **noncommercial** purposes. Selling it or using it in a commercial product is not allowed. PresentMon and the Polymath API have their own terms.

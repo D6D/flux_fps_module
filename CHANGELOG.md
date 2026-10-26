@@ -5,7 +5,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
-- MIT license.
+- License: PolyForm Noncommercial 1.0.0 (free for noncommercial use). It replaces the MIT license that was published for a few minutes on 2026-10-26.
 
 ## [0.2.0] - 2026-10-26
 
