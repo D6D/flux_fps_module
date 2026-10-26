@@ -90,3 +90,7 @@ docs/             notes, setup and dev journal (Spanish)
 ```
 
 See [CHANGELOG.md](CHANGELOG.md) for the history.
+
+## License
+
+[MIT](LICENSE): use it, change it and share it freely. PresentMon and the Polymath API have their own terms.

@@ -2,6 +2,11 @@
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- MIT license.
+
 ## [0.2.0] - 2026-10-26
 
 First version working on the keyboard.
@@ -32,5 +37,6 @@ First version working on the keyboard.
 - Automatic reconnection when Polymath or its API isn't available.
 - `--dry-run` mode and `iniciar.bat` to run in the background.
 
+[Unreleased]: https://github.com/D6D/flux_fps_module/compare/v0.2.0...HEAD
 [0.2.0]: https://github.com/D6D/flux_fps_module/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/D6D/flux_fps_module/releases/tag/v0.1.0
