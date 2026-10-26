@@ -7,13 +7,12 @@
   "presentmon_path": "tools/PresentMon.exe",
   "colors": true,
   "tiles": [
-    { "index": 0, "title": "CPU", "metric": "cpu" },
-    { "index": 1, "title": "GPU", "metric": "gpu" },
-    { "index": 2, "title": "VRAM", "metric": "vram" },
     { "index": 3, "title": "FPS", "metric": "fps" }
   ]
 }
 ```
+
+Por defecto hay un solo tile de FPS en la posición 3, al lado del «Hardware Status Text» de serie de Polymath. La configuración antigua de cuatro tiles (CPU, GPU, VRAM y FPS) está en `config.4tiles.json`.
 
 | Clave | Significado |
 | ----- | ----------- |
@@ -31,9 +30,9 @@
 | `ram` | RAM % | GB usados/total | 70 % / 90 % |
 | `gpu` | carga GPU % | °C · W | 80 % / 95 % |
 | `vram` | GB usados | % del total | 75 % / 90 % |
-| `fps` | FPS de la ventana activa | nombre del exe | por debajo de 45 / 30 FPS |
+| `fps` | FPS de la ventana activa | arriba: juego (título de la ventana) y «G-SYNC» si está actuando; bajo el número: 1% low | por debajo de 45 / 30 FPS |
 
-Como solo caben 4 tiles y hay 5 métricas, por defecto la RAM va en la línea secundaria del tile de CPU. Si prefieres verla como gráfica, cambia algún tile por `"metric": "ram"`.
+En la configuración de cuatro tiles la RAM va en la línea secundaria del tile de CPU, porque solo caben 4 tiles y hay 5 métricas.
 
 Los umbrales están en la función `render()` de `flux_perf/__main__.py`.
 

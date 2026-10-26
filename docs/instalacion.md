@@ -1,6 +1,6 @@
 # Instalación
 
-Pasos para dejarlo funcionando en un Windows recién instalado. Los pasos 1 a 3 ya están hechos en el PC de sobremesa (25-oct-2026).
+Pasos para dejarlo funcionando en un Windows recién instalado. En el PC de sobremesa están todos hechos (25 y 26-oct-2026).
 
 ## 1. Python
 
@@ -35,7 +35,7 @@ $rel = Invoke-RestMethod https://api.github.com/repos/GameTechDev/PresentMon/rel
 
 Instalada: **v2.6.0** (21-sep-2026).
 
-## 4. Permiso para PresentMon ⚠️ pendiente
+## 4. Permiso para PresentMon
 
 PresentMon lee eventos ETW del sistema. Para eso necesita **o bien ejecutarse como administrador, o bien que el usuario esté en el grupo «Usuarios del registro de rendimiento»** (*Performance Log Users*, SID `S-1-5-32-559`). Sin esto, el tile de FPS muestra «sin juego» y el log avisa con `PresentMon sin permisos`.
 
@@ -47,7 +47,7 @@ Add-LocalGroupMember -SID 'S-1-5-32-559' -Member "$env:USERDOMAIN\$env:USERNAME"
 
 Después hay que **cerrar sesión y volver a entrar**, porque la pertenencia a grupos solo se aplica al iniciar sesión.
 
-## 5. Activar la API en Polymath ⚠️ pendiente
+## 5. Activar la API en Polymath
 
 En Polymath → Ajustes → API: activarla. Al hacerlo, Polymath:
 
