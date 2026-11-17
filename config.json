@@ -10,6 +10,12 @@
       "metric": "fps"
     }
   ],
+  "mosaic_rules": [
+    {
+      "process": "D2R.exe",
+      "tile_types": []
+    }
+  ],
   "block_power_button": true,
   "game_dirs": [
     "D:/Battle.net/Diablo II Resurrected",

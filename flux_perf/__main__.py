@@ -18,6 +18,7 @@ from .fps import FpsMonitor
 from .gsync import GSyncMonitor
 from .hdr import HdrMonitor
 from .metrics import SystemMetrics
+from .mosaic_switch import MosaicSwitcher
 from .power_guard import PowerButtonGuard
 from .polymath import ApiError, GraphTile, PolymathClient, PolymathNotReady
 
@@ -107,6 +108,7 @@ def run(config, dry_run):
         hdr = HdrMonitor()
 
     client = PolymathClient()
+    switcher = MosaicSwitcher(config.get("mosaic_rules", []))
     guard = None
     if config.get("block_power_button", True):
         guard = PowerButtonGuard(config.get("game_dirs", []), config.get("games", []))
@@ -132,7 +134,15 @@ def run(config, dry_run):
             if dry_run:
                 print(" | ".join(f"{t['title']}: {r['value']:.1f} {r['unit']} ({r['secondary']})" for t, r in rendered), flush=True)
             else:
-                if not connected and started >= next_retry:
+                try:
+                    if switcher.poll():
+                        connected, next_retry = False, 0
+                except Exception:
+                    log.exception("Error cambiando los módulos de Polymath")
+                # En modo juego los módulos los fija el switcher: no se crean ni se actualizan tiles.
+                if switcher.game_mode:
+                    connected = False
+                elif not connected and started >= next_retry:
                     try:
                         client.connect()
                         tiles = setup_tiles(client, config)
