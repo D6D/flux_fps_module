@@ -18,6 +18,7 @@ from .fps import FpsMonitor
 from .gsync import GSyncMonitor
 from .hdr import HdrMonitor
 from .metrics import SystemMetrics
+from .power_guard import PowerButtonGuard
 from .polymath import ApiError, GraphTile, PolymathClient, PolymathNotReady
 
 log = logging.getLogger("flux_perf")
@@ -106,6 +107,9 @@ def run(config, dry_run):
         hdr = HdrMonitor()
 
     client = PolymathClient()
+    guard = None
+    if config.get("block_power_button", True):
+        guard = PowerButtonGuard(config.get("game_dirs", []), config.get("games", []))
     tiles = []
     connected = False
     next_retry = 0
@@ -119,6 +123,11 @@ def run(config, dry_run):
             m = metrics.sample()
             fps = (*fps_monitor.current(), gsync.active(), hdr.active()) if fps_monitor else (None,) * 5
             rendered = [(t, render(t["metric"], m, fps)) for t in config["tiles"]]
+            if guard:
+                try:
+                    guard.poll()
+                except Exception:
+                    log.exception("Error con el botón de apagado")
 
             if dry_run:
                 print(" | ".join(f"{t['title']}: {r['value']:.1f} {r['unit']} ({r['secondary']})" for t, r in rendered), flush=True)
@@ -152,6 +161,11 @@ def run(config, dry_run):
         log.info("Parando")
         return 0
     finally:
+        if guard:
+            try:
+                guard.restore()
+            except Exception:
+                log.exception("No se pudo restaurar el botón de apagado")
         if fps_monitor:
             fps_monitor.stop()
         metrics.close()

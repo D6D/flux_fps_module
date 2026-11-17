@@ -9,5 +9,13 @@
       "title": "FPS",
       "metric": "fps"
     }
-  ]
+  ],
+  "block_power_button": true,
+  "game_dirs": [
+    "D:/Battle.net/Diablo II Resurrected",
+    "E:/gog",
+    "E:/Rockstar Games",
+    "C:/Program Files (x86)/Ubisoft/Ubisoft Game Launcher/games"
+  ],
+  "games": []
 }
