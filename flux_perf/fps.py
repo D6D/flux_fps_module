@@ -26,8 +26,12 @@ WINDOW_SECONDS = 1.5
 # Ventana para el 1% low: los tirones se notan en segundos, no en un instante
 LOW_WINDOW_SECONDS = 10
 LOW_MIN_FRAMES = 100
-# Procesos que presentan frames pero no son juegos (el escritorio y el propio Polymath)
-IGNORED_APPS = {"dwm.exe", "polymath.exe"}
+# Procesos que presentan frames pero no son juegos: el escritorio, Polymath y programas
+# habituales (la terminal con Claude, el navegador, Steam...). Se pueden añadir más con
+# "ignored_apps" en config.json.
+IGNORED_APPS = {"dwm.exe", "polymath.exe", "windowsterminal.exe", "explorer.exe", "brave.exe",
+                "steamwebhelper.exe", "steam.exe", "applicationframehost.exe",
+                "evnia precision center.exe"}
 RESTART_SECONDS = 10
 REPORT_SECONDS = 60
 
@@ -47,8 +51,9 @@ def foreground_window():
 
 
 class FpsMonitor:
-    def __init__(self, presentmon_path):
+    def __init__(self, presentmon_path, ignored_apps=()):
         self.path = Path(presentmon_path)
+        self.ignored = IGNORED_APPS | {a.lower() for a in ignored_apps}
         self.proc = None
         self.started_at = 0.0
         self.last_foreground, self.last_report = None, 0.0
@@ -149,7 +154,7 @@ class FpsMonitor:
             q = self.frames.get(pid)
             if not q or now - q[-1][0] > WINDOW_SECONDS:
                 return None, None, None
-            if self.apps.get(pid, "").lower() in IGNORED_APPS:
+            if self.apps.get(pid, "").lower() in self.ignored:
                 return None, None, None
             # Media de los tiempos de frame, no número de filas por segundo: la salida de
             # PresentMon llega a ráfagas cuando va por una tubería.

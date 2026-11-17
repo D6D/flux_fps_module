@@ -16,6 +16,7 @@ from pathlib import Path
 
 from .fps import FpsMonitor
 from .gsync import GSyncMonitor
+from .hdr import HdrMonitor
 from .metrics import SystemMetrics
 from .polymath import ApiError, GraphTile, PolymathClient, PolymathNotReady
 
@@ -62,16 +63,16 @@ def render(metric, m, fps):
                     secondary=f"{m['vram_pct']:.0f}% of {m['vram_total_gb']:.0f} GB",
                     color=load_color(m["vram_pct"], 75, 90))
     if metric == "fps":
-        value, low, app, gsync = fps
-        # El título del tile ya dice «FPS»: el subtítulo es el juego (y G-Sync, que en la app
-        # de NVIDIA también va arriba a la izquierda); bajo el número va el 1% low.
+        value, low, app, gsync, hdr = fps
+        # El título del tile ya dice «FPS». Arriba solo va el juego (con G-SYNC y HDR al lado no
+        # cabía: «God of War Ragnarök · G-SYNC · HDR»); abajo, el 1% low y los indicadores.
+        # HDR se muestra también sin juego: depende de Windows, no del juego.
+        flags = " · ".join(f for f, on in (("G-SYNC", gsync and value is not None), ("HDR", hdr)) if on)
         if value is None:
-            return dict(value=0, unit="FPS", sub_title="No game", secondary="", color="Legend")
-        game = app or ""
-        if gsync:
-            game = f"{game} · G-SYNC" if game else "G-SYNC"
-        return dict(value=round(value), unit="FPS", sub_title=game,
-                    secondary=f"1% low {low:.0f}" if low is not None else "",
+            return dict(value=0, unit="FPS", sub_title="No game", secondary=flags, color="Legend")
+        low_txt = f"1% low {low:.0f}" if low is not None else ""
+        return dict(value=round(value), unit="FPS", sub_title=app or "",
+                    secondary=" · ".join(x for x in (low_txt, flags) if x),
                     color=load_color(value, 45, 30, higher_is_worse=False))
     raise ValueError(f"Métrica desconocida: {metric}")
 
@@ -97,11 +98,12 @@ def send(tile, fields, time_unit, colors):
 
 def run(config, dry_run):
     metrics = SystemMetrics()
-    fps_monitor = gsync = None
+    fps_monitor = gsync = hdr = None
     if any(t["metric"] == "fps" for t in config["tiles"]):
-        fps_monitor = FpsMonitor(PROJECT_DIR / config["presentmon_path"])
+        fps_monitor = FpsMonitor(PROJECT_DIR / config["presentmon_path"], config.get("ignored_apps", []))
         fps_monitor.start()
         gsync = GSyncMonitor()
+        hdr = HdrMonitor()
 
     client = PolymathClient()
     tiles = []
@@ -115,7 +117,7 @@ def run(config, dry_run):
         while True:
             started = time.monotonic()
             m = metrics.sample()
-            fps = (*fps_monitor.current(), gsync.active()) if fps_monitor else (None, None, None, None)
+            fps = (*fps_monitor.current(), gsync.active(), hdr.active()) if fps_monitor else (None,) * 5
             rendered = [(t, render(t["metric"], m, fps)) for t in config["tiles"]]
 
             if dry_run:

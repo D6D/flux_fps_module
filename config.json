@@ -4,6 +4,10 @@
   "presentmon_path": "tools/PresentMon.exe",
   "colors": true,
   "tiles": [
-    { "index": 3, "title": "FPS", "metric": "fps" }
+    {
+      "index": 3,
+      "title": "FPS",
+      "metric": "fps"
+    }
   ]
 }
