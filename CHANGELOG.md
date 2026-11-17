@@ -6,6 +6,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - License: PolyForm Noncommercial 1.0.0 (free for noncommercial use). It replaces the MIT license that was published for a few minutes on 2026-10-26.
+- HDR indicator on the FPS tile (Windows `DisplayConfig` advanced colour info, for the display the game is on).
+- `ignored_apps`, plus common non-games ignored by default (terminal, Explorer, Brave, Steam, Evnia Precision Center).
+- Power button guard: the PC's power button does nothing while a game is running (`block_power_button`, `game_dirs`, `games`).
+- Polymath module switching per game (`mosaic_rules`), e.g. hide the top-bar modules while Diablo II Resurrected runs.
+- Automatic HDR per game (`hdr_games`, `hdr_all_games`, `hdr_exclude`).
+
+### Changed
+- FPS tile layout: the game name alone on top; `1% low`, `G-SYNC` and `HDR` underneath (long names didn't fit).
 
 ## [0.2.0] - 2026-10-26
 

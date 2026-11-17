@@ -91,3 +91,12 @@ Polymath trae sus propios «bridges» como procesos aparte: `FluxPolymathHardwar
 | `bIsDisplayInVRRMode` | 1 | 1 (G-Sync configurado en la pantalla) |
 
 Al pasar el foco a otra ventana (p. ej. Steam), `enabled` vuelve a 0: el driver solo aplica G-Sync a la ventana activa.
+
+## HDR con DisplayConfig (16-nov-2026)
+
+`hdr.py` lee el estado con `DisplayConfigGetDeviceInfo` (user32, sin dependencias) en la pantalla donde está la ventana activa:
+
+- Windows 11 24H2 o posterior: `DISPLAYCONFIG_DEVICE_INFO_GET_ADVANCED_COLOR_INFO_2` (tipo 15), campo `activeColorMode` (0 = SDR, 1 = WCG, 2 = HDR). Así no se confunde el HDR con la gestión automática del color.
+- Si falla (versiones anteriores): tipo 9, bit `advancedColorEnabled`.
+
+Comprobado en el Philips Evnia (DISPLAY1, 240 Hz, 10 bits): con HDR `value=0x73, mode=2`. Al apagarlo y encenderlo con Win+Alt+B, el estado cambia en menos de 4 s. Cada cambio queda en el log («HDR en \\.\DISPLAY1: activado»).

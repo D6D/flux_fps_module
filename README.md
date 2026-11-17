@@ -67,6 +67,20 @@ The log goes to `%LOCALAPPDATA%\flux_perf\flux_perf.log`.
 
 `index` is the position in the top bar (0–3). The code can also draw `cpu`, `gpu`, `ram` and `vram` tiles (see `config.4tiles.json`), although the built-in tile looks better for those.
 
+The FPS tile shows the game on top and `1% low · G-SYNC · HDR` underneath.
+
+Optional keys:
+
+| Key | What it does |
+|---|---|
+| `ignored_apps` | Extra executables that present frames but are not games (the terminal, the browser, Steam… are already ignored). |
+| `block_power_button` | `true` (default): while a game is running, the PC's power button does nothing; it is restored when the game closes. |
+| `game_dirs`, `games` | What counts as a game: any exe under these folders (plus `steamapps\common` and `XboxGames`), or with one of these names. |
+| `hdr_games` | Executables that turn Windows HDR on when they start, and off when they close (only if flux_perf turned it on). |
+| `hdr_all_games` | `true`: same as `hdr_games`, for every detected game. |
+| `hdr_exclude` | Games that never turn HDR on. |
+| `mosaic_rules` | Change Polymath's top-bar modules while a given game is running (restarts Polymath; see `flux_perf/mosaic_switch.py`). |
+
 ## Polymath API: things the docs don't tell you
 
 Found by testing against Polymath 1.4.5.7 (details in [docs/api-notas.md](docs/api-notas.md), in Spanish):

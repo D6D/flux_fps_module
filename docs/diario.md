@@ -74,3 +74,47 @@ Al cerrar la sesión, los pasos 1 y 2 seguían sin hacer. Hay que empezar por ah
 3. ~~Arranque automático con Windows~~ → hecho: acceso directo «Flux Perf Monitor» en `shell:startup` (ver [instalacion.md](instalacion.md)).
 4. Commit de todo lo de hoy.
 5. Si el usuario quita el tile de FPS de la barra con el módulo en marcha, el módulo lo vuelve a crear en la posición 3 y lo graba en el teclado. Propuesto: respetarlo.
+
+## 16-nov-2026: indicador de HDR
+
+**Hecho**
+
+- Nuevo `hdr.py`: el subtítulo del tile de FPS añade «HDR» cuando Windows tiene el HDR activado en la pantalla del juego. Va igual que «G-SYNC» (solo aparece cuando está activo) y se ve también sin juego («No game · HDR»). Ejemplo: «Forza Horizon 6 · G-SYNC · HDR».
+- Probado apagándolo y encendiéndolo con Win+Alt+B (la misma combinación que la macro «HDR» de la tecla Pausa). Detalles en [api-notas.md](api-notas.md#hdr-con-displayconfig-16-nov-2026).
+- Módulo reiniciado con el cambio.
+- El usuario vio que, con la terminal de Claude en primer plano, el tile la tomaba por un juego (presenta frames) y el texto largo del título tapaba «HDR». Ahora se ignoran también WindowsTerminal, Explorador, Brave, Steam y Evnia Precision Center, y se pueden añadir más con `ignored_apps` en config.json.
+
+**Pendiente**
+
+1. Ver en el teclado si el subtítulo largo (juego · G-SYNC · HDR) cabe o se corta. Si se corta, acortar el nombre del juego.
+2. `gsync.py` sigue fijo en DISPLAY1. Ahora solo hay una pantalla, pero si se vuelve a conectar el Acer habrá que usar la misma pantalla que el HDR.
+
+## 16-nov-2026: botón de apagado bloqueado mientras se juega
+
+**Hecho**
+
+- Nuevo `power_guard.py`: si hay un juego abierto, cambia en el plan de energía activo la «Acción de botón de inicio/apagado» (PBUTTONACTION) a «No hacer nada». Al cerrar el juego, o al salir de flux_perf, la deja como estaba (aquí era «Apagar»). Con powercfg no hacen falta permisos de administrador; está comprobado.
+- Un proceso cuenta como juego si su .exe está en `steamapps\common` o `XboxGames` (en cualquier unidad), en `game_dirs` (Battle.net\Diablo II Resurrected, E:\gog, E:\Rockstar Games, juegos de Ubisoft) o si está en `games`. Se excluyen lanzadores e instaladores.
+- El valor original se guarda en `%LOCALAPPDATA%\flux_perf\power_button.json`, así que se restaura aunque flux_perf se caiga en mitad de una partida.
+- Primera prueba real: BF6 abierto, botón a 0 y valor guardado. Como el antitrampas de EA no deja arrancar PresentMon con BF6 abierto, no se reinició flux_perf: para esa partida se usó un proceso aparte que restaura el botón al cerrar el juego.
+
+**Pendiente**
+
+1. Reiniciar flux_perf cuando no haya ningún juego abierto (o esperar al próximo arranque de Windows) para que el bloqueo funcione siempre.
+2. Comprobar al cerrar BF6 que el botón vuelve a «Apagar».
+
+## 17-nov-2026: HDR automático por juego
+
+**Hecho**
+
+- Nuevo `hdr_switch.py`: al abrir un juego de `hdr_games` (`D2R.exe`, `bf6.exe`) enciende el HDR en las pantallas que lo admiten y lo tienen apagado; al cerrarlo lo apaga, pero solo donde lo encendió él. Usa `DisplayConfigSetDeviceInfo` con `DISPLAYCONFIG_SET_HDR_STATE` (16, Windows 11 24H2 o posterior) y, si falla, `SET_ADVANCED_COLOR_STATE` (10). No necesita permisos de administrador.
+- Las pantallas encendidas se apuntan en `%LOCALAPPDATA%\flux_perf\hdr_switch.json`: si flux_perf se cierra a mitad de partida, al volver a arrancar apaga el HDR cuando no queda ningún juego de la lista abierto. Al salir de flux_perf no lo apaga, para no cambiarlo con el juego en marcha.
+- Probado con python.exe haciendo de «juego»: HDR activado → desactivado y fichero borrado. Módulo reiniciado con el cambio (18:33).
+- Ampliado a petición del usuario: con `hdr_all_games: true` vale cualquier juego que detecte `power_guard` (su `_find_game` pasa a ser `find_game`, público); `hdr_exclude` para las excepciones. Los juegos sin HDR propio se ven con Auto HDR de Windows (DX11/DX12) o como SDR dentro del HDR.
+- Probado con God of War Ragnarök (Steam): HDR encendido solo al abrir GoWR.exe (18:40:49).
+- El subtítulo «God of War Ragnarök · G-SYNC · HDR» no cabía: ahora arriba solo va el juego y abajo «1% low N · G-SYNC · HDR» (sin juego: «No game» y debajo los indicadores). Pendiente que el usuario confirme que cabe.
+- Estado visto en DISPLAY1 con HDR apagado: modo 1 (WCG), es decir, la gestión automática del color (ACM) está activa en SDR.
+
+**Pendiente**
+
+1. Probarlo de verdad con D2R y BF6: que el juego detecte el HDR al arrancar (se enciende a los ~2 s de aparecer el proceso). Si algún juego arranca en SDR, activar el HDR en su menú o lanzarlo con el HDR ya encendido.
