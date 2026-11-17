@@ -23,5 +23,8 @@
     "E:/Rockstar Games",
     "C:/Program Files (x86)/Ubisoft/Ubisoft Game Launcher/games"
   ],
-  "games": []
+  "games": [],
+  "hdr_games": ["D2R.exe", "bf6.exe"],
+  "hdr_all_games": true,
+  "hdr_exclude": []
 }

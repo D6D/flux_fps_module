@@ -17,6 +17,7 @@ from pathlib import Path
 from .fps import FpsMonitor
 from .gsync import GSyncMonitor
 from .hdr import HdrMonitor
+from .hdr_switch import HdrAutoSwitcher
 from .metrics import SystemMetrics
 from .mosaic_switch import MosaicSwitcher
 from .power_guard import PowerButtonGuard
@@ -112,6 +113,10 @@ def run(config, dry_run):
     guard = None
     if config.get("block_power_button", True):
         guard = PowerButtonGuard(config.get("game_dirs", []), config.get("games", []))
+    finder = None
+    if config.get("hdr_all_games"):
+        finder = (guard or PowerButtonGuard(config.get("game_dirs", []), config.get("games", []))).find_game
+    hdr_switch = HdrAutoSwitcher(config.get("hdr_games", []), finder, config.get("hdr_exclude", []))
     tiles = []
     connected = False
     next_retry = 0
@@ -130,6 +135,10 @@ def run(config, dry_run):
                     guard.poll()
                 except Exception:
                     log.exception("Error con el botón de apagado")
+            try:
+                hdr_switch.poll()
+            except Exception:
+                log.exception("Error cambiando el HDR")
 
             if dry_run:
                 print(" | ".join(f"{t['title']}: {r['value']:.1f} {r['unit']} ({r['secondary']})" for t, r in rendered), flush=True)
