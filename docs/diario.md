@@ -118,3 +118,12 @@ Al cerrar la sesión, los pasos 1 y 2 seguían sin hacer. Hay que empezar por ah
 **Pendiente**
 
 1. Probarlo de verdad con D2R y BF6: que el juego detecte el HDR al arrancar (se enciende a los ~2 s de aparecer el proceso). Si algún juego arranca en SDR, activar el HDR en su menú o lanzarlo con el HDR ya encendido.
+
+## 2026-11-20
+
+**Polymath ya no sale delante al abrir o cerrar D2R**
+
+- Problema: `mosaic_switch` reinicia Polymath al abrir y al cerrar un juego de `mosaic_rules` (D2R), y lo abría con `explorer.exe shell:AppsFolder\...`, así que su ventana aparecía en primer plano, encima del juego (en el log, «primer plano polymath.exe» con D2R abierto). Al usuario le resultaba muy molesto.
+- Solución: Polymath admite `--hidden`; es lo que usa su propia tarea de inicio (`desktop:StartupTask` en AppxManifest.xml) y hace que arranque en la bandeja. Como `shell:AppsFolder` no deja pasar parámetros, ahora se lanza con `IApplicationActivationManager::ActivateApplication` (COM desde ctypes, `_activate_app`). Si falla, se abre como antes.
+- Probado: Polymath arranca sin ninguna ventana visible, el primer plano no cambia y flux_perf se reconecta solo. Módulo reiniciado con el cambio (15:25).
+- El HDR automático también hace parpadear la pantalla al abrir y cerrar el juego; eso no tiene arreglo, porque es Windows cambiando de modo.

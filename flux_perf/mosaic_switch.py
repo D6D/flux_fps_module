@@ -13,8 +13,11 @@ no reinicia Polymath. Mientras dura, la disposición normal se guarda en
 `%LOCALAPPDATA%\\flux_perf\\mosaic_normal.json`; que ese fichero exista significa «modo
 juego aplicado», y así se recupera aunque flux_perf se reinicie a mitad de partida.
 """
+import ctypes
 import json
 import logging
+import uuid
+from ctypes import wintypes
 import os
 import shutil
 import subprocess
@@ -30,10 +33,39 @@ log = logging.getLogger(__name__)
 MOSAIC_FILE = CONFIG_DIR / "mosaic.json"
 NORMAL_FILE = Path(os.environ.get("LOCALAPPDATA", ".")) / "flux_perf" / "mosaic_normal.json"
 POLYMATH_EXE = "polymath.exe"
-POLYMATH_APP_ID = r"shell:AppsFolder\FluxGroup.FluxPolymath_42m5gadgr7drm!polymath"
+POLYMATH_AUMID = "FluxGroup.FluxPolymath_42m5gadgr7drm!polymath"
+POLYMATH_APP_ID = "shell:AppsFolder\\" + POLYMATH_AUMID
 POLL_SECONDS = 3
 CLOSE_TIMEOUT = 5
 START_TIMEOUT = 90
+
+
+def _guid(text):
+    g = (ctypes.c_byte * 16)()
+    ctypes.memmove(g, uuid.UUID(text).bytes_le, 16)
+    return g
+
+
+def _activate_app(aumid, arguments):
+    """Lanza una app empaquetada con argumentos (IApplicationActivationManager).
+
+    Abrirla con shell:AppsFolder no deja pasar parámetros. Devuelve el PID.
+    """
+    ole32 = ctypes.OleDLL("ole32")
+    ole32.CoInitializeEx(None, 2)  # COINIT_APARTMENTTHREADED; si ya estaba iniciado no pasa nada
+    manager = ctypes.c_void_p()
+    ole32.CoCreateInstance(ctypes.byref(_guid("45BA127D-10A8-46EA-8AB7-56EA9078943C")), None, 4,
+                           ctypes.byref(_guid("2E941141-7F97-4756-BA1D-9DECDE894A3D")), ctypes.byref(manager))
+    vtbl = ctypes.cast(ctypes.cast(manager, ctypes.POINTER(ctypes.c_void_p))[0], ctypes.POINTER(ctypes.c_void_p))
+    activate = ctypes.WINFUNCTYPE(ctypes.HRESULT, ctypes.c_void_p, wintypes.LPCWSTR, wintypes.LPCWSTR,
+                                  ctypes.c_int, ctypes.POINTER(wintypes.DWORD))(vtbl[3])
+    release = ctypes.WINFUNCTYPE(ctypes.c_ulong, ctypes.c_void_p)(vtbl[2])
+    pid = wintypes.DWORD()
+    try:
+        activate(manager, aumid, arguments, 0, ctypes.byref(pid))
+    finally:
+        release(manager)
+    return pid.value
 
 
 class MosaicSwitcher:
@@ -95,7 +127,13 @@ class MosaicSwitcher:
         psutil.wait_procs(alive, timeout=5)
 
     def _start_polymath_and_save(self):
-        subprocess.Popen(["explorer.exe", POLYMATH_APP_ID])
+        # Con «--hidden» (lo que usa su propia tarea de inicio) arranca en la bandeja y no le
+        # roba el foco al juego. Si la activación falla, lo abrimos como antes.
+        try:
+            _activate_app(POLYMATH_AUMID, "--hidden")
+        except OSError as e:
+            log.warning("No se pudo lanzar Polymath oculto (%s); abriéndolo normal", e)
+            subprocess.Popen(["explorer.exe", POLYMATH_APP_ID])
         client = PolymathClient()
         deadline = time.monotonic() + START_TIMEOUT
         while True:
